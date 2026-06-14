@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pitch – Sesgos Cognitivos | Kolbe</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --v: #00C9A7; --v2: #00E8C3; --r: #E05A4E; --b: #F0EEE9;
+  --g: #6B6B80; --bg: #06060F; --card: #0D0D1A; --oro: #F5A623;
+  --borde: rgba(255,255,255,0.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:var(--bg)}
+.reveal-viewport{background:var(--bg)}
+.reveal{font-family:'Inter',sans-serif;color:var(--b)}
+.reveal .slides{text-align:left}
+.reveal .slides section{padding:0;overflow:hidden;height:100%}
+.reveal .progress{color:var(--v);height:3px}
+.reveal .controls{color:var(--v);bottom:18px}
+.reveal .controls .navigate-left,.reveal .controls .navigate-right{opacity:.5}
+.reveal .controls .navigate-left:hover,.reveal .controls .navigate-right:hover{opacity:1}
+
+/* TYPOGRAPHY */
+.syne{font-family:'Syne',sans-serif;font-weight:800;letter-spacing:-.025em;line-height:1.05}
+.eye{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--v);display:block;margin-bottom:14px}
+
+/* LAYOUT */
+.si{position:relative;width:100%;height:100%;padding:42px 62px 36px;display:flex;flex-direction:column;z-index:2}
+canvas.bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.si>*{position:relative;z-index:2}
+.snum{position:absolute;top:22px;right:26px;font-size:10px;color:rgba(107,107,128,.6);letter-spacing:.1em;z-index:10}
+
+/* TIMER */
+#tmr{position:fixed;bottom:14px;right:18px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;
+  color:var(--g);z-index:9999;cursor:pointer;background:rgba(6,6,15,.85);padding:5px 13px;
+  border-radius:999px;border:1px solid var(--borde);letter-spacing:.06em;transition:color .3s,border-color .3s;backdrop-filter:blur(8px)}
+#tmr.w{color:var(--oro);border-color:rgba(245,166,35,.35)}
+#tmr.d{color:var(--r);border-color:rgba(224,90,78,.4)}
+
+/* FRAGMENT ANIMATIONS */
+.reveal .fragment{opacity:0;transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1)}
+.reveal .fragment.fy{transform:translateY(22px)}
+.reveal .fragment.fx-{transform:translateX(-28px)}
+.reveal .fragment.fx+,.reveal .fragment.fxp{transform:translateX(28px)}
+.reveal .fragment.fs{transform:scale(.85);transition:opacity .5s ease,transform .55s cubic-bezier(.34,1.56,.64,1)}
+.reveal .fragment.visible{opacity:1!important;transform:none!important}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:22px 24px;position:relative;overflow:hidden}
+.card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.02),transparent);pointer-events:none}
+.card .bar{position:absolute;top:0;left:0;right:0;height:2px}
+.card.gv .bar{background:linear-gradient(90deg,var(--v),transparent)}
+.card.go .bar{background:linear-gradient(90deg,var(--oro),transparent)}
+.card .tag{font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;padding:3px 10px;border-radius:999px;display:inline-block;margin-bottom:10px}
+.card .tag.tv{background:rgba(0,201,167,.12);color:var(--v)}
+.card .tag.to{background:rgba(245,166,35,.12);color:var(--oro)}
+.card .tag.tr{background:rgba(224,90,78,.12);color:var(--r)}
+.card h3{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--b);margin-bottom:6px}
+.card p{font-size:12px;color:var(--g);line-height:1.65}
+.card .bignum{font-family:'Syne',sans-serif;font-weight:800;font-size:50px;line-height:1;letter-spacing:-.03em;margin-bottom:6px}
+.card .bignum.cv{color:var(--v)} .card .bignum.co{color:var(--oro)}
+.card .cite{font-size:9.5px;color:rgba(107,107,128,.55);margin-top:8px;font-style:italic}
+
+/* ══ SLIDE 1 ══ */
+#s1 .grid2{display:grid;grid-template-columns:1fr 1px 1fr;height:290px;margin-top:24px;flex-shrink:0}
+#s1 .vline{background:linear-gradient(to bottom,transparent,var(--v) 30%,var(--v) 70%,transparent);width:1px}
+#s1 .opt{padding:20px 34px;display:flex;flex-direction:column;justify-content:center}
+#s1 .otag{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px}
+#s1 .oa .otag{color:var(--v)} #s1 .ob .otag{color:var(--r)}
+#s1 .otxt{font-family:'Syne',sans-serif;font-weight:700;font-size:24px;line-height:1.3;color:var(--b)}
+#s1 .osub{font-size:12px;color:var(--g);margin-top:10px;line-height:1.5}
+#s1 .hint{margin-top:16px;font-size:13px;color:var(--g);font-style:italic;border-top:1px solid var(--borde);padding-top:14px}
+
+/* ══ SLIDE 2 ══ */
+#s2 .pill{display:inline-block;background:rgba(0,201,167,.1);border:1px solid rgba(0,201,167,.3);border-radius:999px;padding:6px 16px;font-size:11px;color:var(--v);margin-bottom:16px}
+#s2 .h{font-family:'Syne',sans-serif;font-weight:700;font-size:28px;line-height:1.25;margin-bottom:6px}
+#s2 .sub{font-size:13px;color:var(--g);margin-bottom:22px;line-height:1.6}
+#s2 .srow{display:grid;grid-template-columns:1fr 1fr;gap:36px}
+#s2 .bigc{font-family:'Syne',sans-serif;font-weight:800;font-size:88px;line-height:1;letter-spacing:-.04em}
+#s2 .bigc.cv{color:var(--v)} #s2 .bigc.cr{color:var(--r)}
+#s2 .sdesc{font-size:12.5px;color:var(--g);margin-top:6px;line-height:1.6}
+
+/* ══ SLIDE 3 ══ */
+#s3 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+
+/* ══ SLIDE 4 ══ */
+#s4 .rgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+#s4 .bridge{margin-top:16px;padding:13px 20px;border-left:3px solid var(--v);background:rgba(0,201,167,.05);border-radius:0 10px 10px 0;font-size:13px;color:var(--b);line-height:1.6}
+
+/* ══ SLIDE 5 ══ */
+#s5 .pbox{margin-top:18px;padding:24px 28px;border:1px solid rgba(0,201,167,.3);border-radius:13px;background:rgba(0,201,167,.04)}
+#s5 .pbox p{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;line-height:1.55;color:var(--b)}
+#s5 .pbox em{color:var(--v);font-style:normal}
+#s5 .ot{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--g);font-weight:600;margin:20px 0 12px}
+#s5 .egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#s5 .etapa{background:var(--card);border:1px solid var(--borde);border-radius:12px;padding:16px 18px}
+#s5 .enum{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--v);margin-bottom:4px}
+#s5 .el{font-size:13px;font-weight:600;color:var(--b);margin-bottom:4px}
+#s5 .ed{font-size:11.5px;color:var(--g);line-height:1.5}
+
+/* ══ SLIDE 6 ══ */
+#s6 .tgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:18px}
+#s6 .cierre{margin-top:16px;padding:15px 20px;background:linear-gradient(135deg,rgba(0,201,167,.08),rgba(0,201,167,.02));border-radius:10px;border:1px solid rgba(0,201,167,.18);font-size:13px;color:var(--b);line-height:1.65;font-style:italic}
+</style>
+</head>
+<body>
+<div id="tmr">▶ 3:00</div>
+<div class="reveal">
+<div class="slides">
+
+<!-- ══ S1: GANCHO ══ -->
+<section id="s1" data-transition="fade" data-transition-speed="slow">
+<canvas class="bg" id="c1"></canvas>
+<div class="si">
+  <span class="snum">1 / 6</span>
+  <span class="eye">Experimento en vivo</span>
+  <h2 class="syne" style="font-size:34px">Dos productos.<br>El mismo precio.<br><span style="color:var(--v)">¿Cuál elegirían?</span></h2>
+  <div class="grid2">
+    <div class="opt oa fragment fx-" data-fragment-index="1">
+      <span class="otag">Opción A</span>
+      <p class="otxt">"90% libre<br>de grasa"</p>
+      <p class="osub">Galletas empaquetadas · $3.200</p>
+    </div>
+    <div class="vline"></div>
+    <div class="opt ob fragment fxp" data-fragment-index="1">
+      <span class="otag">Opción B</span>
+      <p class="otxt">"contiene<br>10% de grasa"</p>
+      <p class="osub">Galletas empaquetadas · $3.200</p>
+    </div>
+  </div>
+  <p class="hint fragment fy" data-fragment-index="2">Confíen en su instinto. El cerebro ya decidió.</p>
+</div>
+</section>
+
+<!-- ══ S2: REVELACIÓN ══ -->
+<section id="s2" data-transition="fade" data-transition-speed="slow">
+<canvas class="bg" id="c2"></canvas>
+<div class="si">
+  <span class="snum">2 / 6</span>
+  <div class="pill fragment fs" data-fragment-index="0">Son exactamente el mismo producto.</div>
+  <h2 class="h">El cerebro eligió. Sin datos.<br>Solo por el <span style="color:var(--v)">encuadre.</span></h2>
+  <p class="sub">Tversky & Kahneman lo demostraron en 1981. Misma situación, distinto framing:</p>
+  <div class="srow">
+    <div class="fragment fx-" data-fragment-index="1">
+      <div class="bigc cv" id="n72">0%</div>
+      <p class="sdesc">eligió la opción con framing <strong style="color:var(--v)">positivo</strong></p>
+    </div>
+    <div class="fragment fxp" data-fragment-index="2">
+      <div class="bigc cr" id="n22">0%</div>
+      <p class="sdesc">eligió la misma opción con framing <strong style="color:var(--r)">negativo</strong></p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S3: GLOBALES ══ -->
+<section id="s3" data-transition="fade" data-transition-speed="slow">
+<canvas class="bg" id="c3"></canvas>
+<div class="si">
+  <span class="snum">3 / 6</span>
+  <span class="eye">Escala global</span>
+  <h2 class="syne" style="font-size:27px">El problema está documentado<br>a nivel mundial.</h2>
+  <div class="sgrid">
+    <div class="card gv fragment fy" data-fragment-index="1">
+      <div class="bar"></div>
+      <div class="tag tv">Universidad de Queensland · 2025</div>
+      <div class="bignum cv">53 <span style="font-size:22px;color:var(--g)">estudios</span></div>
+      <p>El mayor análisis sistemático de su tipo. Cómo los sesgos impactan las decisiones en estudiantes — <strong style="color:var(--b)">10.941 participantes</strong> en total.</p>
+      <div class="cite">Swaryandini & Noetel, 2025</div>
+    </div>
+    <div class="card gv fragment fy" data-fragment-index="2">
+      <div class="bar"></div>
+      <div class="tag tv">Reuters Institute · Oxford · 2025</div>
+      <div class="bignum cv">58<span style="font-size:22px;color:var(--g)">%</span></div>
+      <p>de la población global <strong style="color:var(--b)">no distingue qué es verdadero</strong> de lo falso al consumir noticias online. +4 pts vs 2022.</p>
+      <div class="cite">Digital News Report 2025 · 48 países · 5 continentes</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S4: LATAM + CO ══ -->
+<section id="s4" data-transition="fade" data-transition-speed="slow">
+<canvas class="bg" id="c4"></canvas>
+<div class="si">
+  <span class="snum">4 / 6</span>
+  <span class="eye">Más cerca de casa</span>
+  <h2 class="syne" style="font-size:27px">Latinoamérica y Colombia<br>no son la excepción.</h2>
+  <div class="rgrid">
+    <div class="card go fragment fx-" data-fragment-index="1">
+      <div class="bar"></div>
+      <div class="tag to">Latinoamérica · Chile</div>
+      <div class="bignum co">94<span style="font-size:22px;color:var(--g)">%</span></div>
+      <p>de universitarios buscó <strong style="color:var(--b)">solo información que confirmara</strong> sus hipótesis previas. Solo el 6% contrastó fuentes.</p>
+      <div class="cite">Castro et al., 2019 · 3 universidades · 198 estudiantes</div>
+    </div>
+    <div class="card gv fragment fxp" data-fragment-index="2">
+      <div class="bar"></div>
+      <div class="tag tv">Colombia · Pasto</div>
+      <div class="bignum cv">72<span style="font-size:22px;color:var(--g)">%</span></div>
+      <p>de estudiantes de bachillerato en grados 9°–11° en <strong style="color:var(--b)">nivel indeciso</strong> en sus patrones globales de toma de decisiones.</p>
+      <div class="cite">Flórez-Madroñero & Pantoja-Solarte, 2024 · 50 estudiantes</div>
+    </div>
+  </div>
+  <div class="bridge fragment fy" data-fragment-index="3">
+    Y todo esto ocurre también aquí — en los pasillos del <strong>Colegio Bilingüe Maximiliano Kolbe.</strong> Solo que aún no hay datos que lo confirmen.
+  </div>
+</div>
+</section>
+
+<!-- ══ S5: PREGUNTA + OBJ ══ -->
+<section id="s5" data-transition="fade" data-transition-speed="slow">
+<canvas class="bg" id="c5"></canvas>
+<div class="si">
+  <span class="snum">5 / 6</span>
+  <span class="eye">Pregunta problema</span>
+  <div class="pbox">
+    <p>¿De qué manera el <em>sesgo de anclaje</em> hace a los jóvenes de bachillerato del Colegio Bilingüe Maximiliano Kolbe susceptibles al <em>framing</em> en sus decisiones relacionales?</p>
+  </div>
+  <div class="ot">Objetivo general · Experimento de tres etapas</div>
+  <div class="egrid">
+    <div class="etapa fragment fs" data-fragment-index="1">
+      <div class="enum">01</div><div class="el">Exposición</div>
+      <div class="ed">Exponer al sesgo mediante escenarios con framing positivo y negativo.</div>
+    </div>
+    <div class="etapa fragment fs" data-fragment-index="2">
+      <div class="enum">02</div><div class="el">Medición</div>
+      <div class="ed">Medir susceptibilidad con formulario mixto y registro de observaciones.</div>
+    </div>
+    <div class="etapa fragment fs" data-fragment-index="3">
+      <div class="enum">03</div><div class="el">Re-exposición</div>
+      <div class="ed">Aplicar nuevamente el experimento tras concientización sobre el sesgo.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S6: TIPO + ENFOQUE ══ -->
+<section id="s6" data-transition="fade" data-transition-speed="slow">
+<canvas class="bg" id="c6"></canvas>
+<div class="si">
+  <span class="snum">6 / 6</span>
+  <span class="eye">Diseño investigativo</span>
+  <h2 class="syne" style="font-size:23px">Tipo y enfoque de la investigación</h2>
+  <div class="tgrid">
+    <div class="card gv fragment fy" data-fragment-index="1">
+      <div class="bar"></div><div class="tag tv">Tipo</div>
+      <h3>Cuasi-experimental</h3>
+      <p>Intervención directa sobre las variables mediante el experimento de tres etapas, sin asignación aleatoria de grupos.</p>
+    </div>
+    <div class="card gv fragment fy" data-fragment-index="2">
+      <div class="bar"></div><div class="tag tv">Alcance</div>
+      <h3>Correlacional</h3>
+      <p>Determina si existe relación entre el nivel de anclaje del estudiante y su susceptibilidad al framing.</p>
+    </div>
+    <div class="card go fragment fy" data-fragment-index="3">
+      <div class="bar"></div><div class="tag to">Enfoque</div>
+      <h3>Cuantitativo</h3>
+      <p>Datos numéricos de escenarios hipotéticos para identificar correlaciones entre las variables del estudio.</p>
+    </div>
+    <div class="card go fragment fy" data-fragment-index="4">
+      <div class="bar"></div><div class="tag to">Enfoque</div>
+      <h3>Cualitativo</h3>
+      <p>Perspectivas y experiencias del grupo focal para una visión holística y humana del problema.</p>
+    </div>
+  </div>
+  <div class="cierre fragment fy" data-fragment-index="5">
+    "El cerebro de sus estudiantes toma decisiones relacionales todos los días bajo influencia del framing. Esta investigación lo va a demostrar con evidencia propia del Kolbe."
+  </div>
+</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script>
+Reveal.initialize({hash:false,controls:true,progress:true,center:false,transition:'fade',transitionSpeed:'slow',backgroundTransition:'fade',width:1100,height:620,margin:.04});
+
+/* TIMER */
+const T=document.getElementById('tmr');
+let el=0,iv=null,run=false;
+const p2=n=>String(n).padStart(2,'0');
+function tick(){el++;const r=180-el;if(r<0){const o=el-180;T.textContent='⚠ +'+Math.floor(o/60)+':'+p2(o%60);T.className='d';return}T.textContent='⏱ '+Math.floor(r/60)+':'+p2(r%60);T.className=r<=30?'d':r<=60?'w':''}
+function startT(){if(!run){run=true;iv=setInterval(tick,1000)}}
+function resetT(){clearInterval(iv);run=false;el=0;T.textContent='▶ 3:00';T.className=''}
+T.onclick=()=>run?resetT():startT();
+Reveal.on('slidechanged',e=>{if(e.indexh>=1&&!run)startT()});
+Reveal.on('fragmentshown',()=>{if(!run)startT()});
+document.addEventListener('keydown',e=>{if(e.key==='t'||e.key==='T')resetT();if(e.key==='s'||e.key==='S')startT()});
+
+/* COUNT-UP */
+function countUp(el,to,sfx,dur){
+  const s=performance.now();
+  (function f(now){
+    const p=Math.min((now-s)/dur,1),e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(e*to)+sfx;
+    if(p<1)requestAnimationFrame(f);else el.textContent=to+sfx;
+  })(s);
+}
+Reveal.on('fragmentshown',ev=>{
+  const sl=Reveal.getCurrentSlide();
+  const fi=ev.fragment.dataset.fragmentIndex;
+  if(sl.id==='s2'&&fi==='1')setTimeout(()=>countUp(document.getElementById('n72'),72,'%',950),80);
+  if(sl.id==='s2'&&fi==='2')setTimeout(()=>countUp(document.getElementById('n22'),22,'%',950),80);
+});
+
+/* ══════════════════════════════
+   CANVAS UTILITIES
+══════════════════════════════ */
+function setupCanvas(id,drawFn,slideIdx){
+  const cv=document.getElementById(id);
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+  let W,H,raf,active=false;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+  resize();
+  window.addEventListener('resize',()=>{resize();drawFn.onResize&&drawFn.onResize(W,H)});
+  function loop(){if(!active)return;drawFn(ctx,W,H);raf=requestAnimationFrame(loop)}
+  Reveal.on('slidechanged',e=>{
+    if(e.indexh===slideIdx){active=true;resize();drawFn.onResize&&drawFn.onResize(W,H);loop()}
+    else{active=false;cancelAnimationFrame(raf)}
+  });
+  if(slideIdx===0){active=true;loop()}
+}
+
+/* ══ BG1: DUAL BRAIN NETWORK ══ */
+(function(){
+  const cv=document.getElementById('c1'),ctx=cv.getContext('2d');
+  let W,H,raf,nodes=[],t=0,active=true;
+  function resize(){
+    W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;
+    nodes=[];
+    for(let i=0;i<50;i++){
+      const s=i<25?-1:1,a=Math.random()*Math.PI*2,r=50+Math.random()*200;
+      nodes.push({
+        x:W/2+s*(50+Math.abs(Math.cos(a))*r*.75),
+        y:H/2+Math.sin(a)*r*.52,
+        bx:0,by:0,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+        r:1.5+Math.random()*2.5,s,ph:Math.random()*Math.PI*2,sp:.01+Math.random()*.02,al:.25+Math.random()*.5
+      });
+    }
+    nodes.forEach(n=>{n.bx=n.x;n.by=n.y});
+  }
+  resize();
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    t+=.006;
+    // center gradient glow
+    const lg=ctx.createLinearGradient(W/2,H*.08,W/2,H*.92);
+    lg.addColorStop(0,'transparent');lg.addColorStop(.5,'rgba(0,201,167,.07)');lg.addColorStop(1,'transparent');
+    ctx.fillStyle=lg;ctx.fillRect(W/2-1.5,0,3,H);
+
+    // Subtle radial glows for each brain half
+    ['rgba(0,201,167,.06)','rgba(224,90,78,.06)'].forEach((c,i)=>{
+      const rg=ctx.createRadialGradient(W/2+(i?1:-1)*W*.2,H/2,0,W/2+(i?1:-1)*W*.2,H/2,W*.28);
+      rg.addColorStop(0,c);rg.addColorStop(1,'transparent');
+      ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+    });
+
+    // Update node positions with slight float
+    nodes.forEach(n=>{
+      n.ph+=n.sp;
+      n.x=n.bx+Math.cos(n.ph)*.8;
+      n.y=n.by+Math.sin(n.ph*1.3)*.5;
+    });
+
+    // Connections
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i],b=nodes[j];
+        if(a.s!==b.s)continue;
+        const d=Math.hypot(a.x-b.x,a.y-b.y);
+        if(d>155)continue;
+        const al=(1-d/155)*.2;
+        const col=a.s===-1?'0,201,167':'224,90,78';
+        // Pulse along connection
+        const pulse=.5+.5*Math.sin(t*2+i*.4);
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(${col},${al*(.6+.4*pulse)})`;
+        ctx.lineWidth=.7+pulse*.4;ctx.stroke();
+
+        // traveling dot
+        if(Math.random()<.002){
+          const frac=((t*30+i*17)%100)/100;
+          const dx=b.x-a.x,dy=b.y-a.y;
+          const px=a.x+dx*frac,py=a.y+dy*frac;
+          ctx.beginPath();ctx.arc(px,py,1.5,0,Math.PI*2);
+          ctx.fillStyle=`rgba(${col},.9)`;ctx.fill();
+        }
+      }
+    }
+
+    // Nodes with halo
+    nodes.forEach((n,i)=>{
+      const col=n.s===-1?'0,201,167':'224,90,78';
+      const pulse=.5+.5*Math.sin(n.ph*2+t);
+      // halo
+      const rg=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r*5);
+      rg.addColorStop(0,`rgba(${col},${n.al*pulse*.5})`);
+      rg.addColorStop(1,`rgba(${col},0)`);
+      ctx.fillStyle=rg;ctx.beginPath();ctx.arc(n.x,n.y,n.r*5,0,Math.PI*2);ctx.fill();
+      // core
+      ctx.fillStyle=`rgba(${col},${.6+.4*pulse})`;
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();
+    });
+
+    raf=requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',()=>{resize()});
+  draw();
+  Reveal.on('slidechanged',e=>{
+    if(e.indexh===0){active=true;if(!raf)draw()}
+    else{cancelAnimationFrame(raf);raf=null}
+  });
+})();
+
+/* ══ BG2: EXPLOSION + PLASMA ══ */
+(function(){
+  const cv=document.getElementById('c2'),ctx=cv.getContext('2d');
+  let W,H,raf,parts=[],t=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+  resize();
+  function mkP(side){
+    return{x:W*(side?.72:.28),y:H*.52,vx:(Math.random()-.5)*2.2+(side?.4:-.4),vy:(Math.random()-.5)*2.2-.4,
+      life:1,dec:.007+Math.random()*.009,r:1+Math.random()*3.5,col:side?'224,90,78':'0,201,167',spin:Math.random()*Math.PI*2}
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    t++;
+    if(t%2===0){parts.push(mkP(0));parts.push(mkP(1))}
+
+    // plasma wave bg
+    for(let i=0;i<3;i++){
+      const wave=Math.sin(t*.03+i*2)*30;
+      const side=i<2?i:0;
+      const rg=ctx.createRadialGradient(W*(side?.72:.28)+wave,H*.52,0,W*.5,H*.5,W*.6);
+      const c=i===1?'224,90,78':'0,201,167';
+      rg.addColorStop(0,`rgba(${c},.04)`);rg.addColorStop(1,'transparent');
+      ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+    }
+
+    // Shockwave rings
+    [.28,.72].forEach((fx,si)=>{
+      const r=(t*.8)%160;
+      const a=(1-r/160)*.25;
+      ctx.beginPath();
+      ctx.arc(W*fx,H*.52,r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(${si?'224,90,78':'0,201,167'},${a})`;
+      ctx.lineWidth=1.5;ctx.stroke();
+      const r2=(t*.8+80)%160;
+      const a2=(1-r2/160)*.15;
+      ctx.beginPath();ctx.arc(W*fx,H*.52,r2,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(${si?'224,90,78':'0,201,167'},${a2})`;
+      ctx.lineWidth=.8;ctx.stroke();
+    });
+
+    // particles
+    for(let i=parts.length-1;i>=0;i--){
+      const p=parts[i];
+      p.x+=p.vx;p.y+=p.vy;p.vy+=.012;p.life-=p.dec;p.spin+=.05;
+      if(p.life<=0){parts.splice(i,1);continue}
+      // trail
+      ctx.beginPath();
+      ctx.moveTo(p.x,p.y);
+      ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);
+      ctx.strokeStyle=`rgba(${p.col},${p.life*.4})`;
+      ctx.lineWidth=p.r*.6;ctx.stroke();
+      // core
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.spin);
+      ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${p.col},${p.life*.9})`;ctx.fill();
+      ctx.restore();
+    }
+    raf=requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  Reveal.on('slidechanged',e=>{
+    if(e.indexh===1){if(!raf){t=0;parts=[];draw()}}
+    else{cancelAnimationFrame(raf);raf=null;parts=[]}
+  });
+})();
+
+/* ══ BG3: CONSTELLATION + DATA STREAMS ══ */
+(function(){
+  const cv=document.getElementById('c3'),ctx=cv.getContext('2d');
+  let W,H,raf,pts=[],streams=[],t=0;
+  function resize(){
+    W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;
+    pts=Array.from({length:55},()=>({
+      x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,
+      r:.8+Math.random()*2,ph:Math.random()*Math.PI*2,sp:.008+Math.random()*.012
+    }));
+    streams=Array.from({length:6},(_,i)=>({x:Math.random()*W,y:0,sp:.8+Math.random()*1.2,
+      dots:Array.from({length:8},(_,j)=>({y:-j*28,al:.1+j*.1})),col:'0,201,167'}));
+  }
+  resize();
+  function draw(){
+    ctx.clearRect(0,0,W,H);t+=.008;
+    // scanline subtle
+    for(let y=0;y<H;y+=3){
+      ctx.fillStyle=`rgba(0,201,167,${.005+.003*Math.sin(y*.05+t)})`;
+      ctx.fillRect(0,y,W,1);
+    }
+    // connections
+    pts.forEach(p=>{p.ph+=p.sp;p.x+=p.vx+Math.sin(p.ph)*.08;p.y+=p.vy+Math.cos(p.ph)*.06;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0});
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
+      if(d>130)continue;
+      const al=(1-d/130)*.14;
+      ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+      ctx.strokeStyle=`rgba(0,201,167,${al})`;ctx.lineWidth=.6;ctx.stroke();
+    }
+    pts.forEach(p=>{
+      const pulse=.5+.5*Math.sin(p.ph*3+t*2);
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,201,167,${.3+.3*pulse})`;ctx.fill();
+    });
+    // data streams falling
+    streams.forEach(s=>{
+      s.dots.forEach((d,i)=>{
+        const y=(s.y+d.y+t*s.sp*40)%H;
+        ctx.beginPath();ctx.arc(s.x,y,1,0,Math.PI*2);
+        ctx.fillStyle=`rgba(0,201,167,${d.al*(.5+.5*Math.sin(t*3+i))})`;ctx.fill();
+      });
+    });
+    raf=requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  Reveal.on('slidechanged',e=>{
+    if(e.indexh===2){if(!raf)draw()}else{cancelAnimationFrame(raf);raf=null}
+  });
+})();
+
+/* ══ BG4: LATAM MAP ABSTRACT + CONVERGENCE ══ */
+(function(){
+  const cv=document.getElementById('c4'),ctx=cv.getContext('2d');
+  let W,H,raf,t=0,beams=[],rings=[];
+  function resize(){
+    W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;
+    beams=Array.from({length:22},(_,i)=>({
+      angle:(i/22)*Math.PI*2,len:0,max:130+Math.random()*110,
+      sp:.7+Math.random()*.5,col:i<11?'245,166,35':'0,201,167',w:.5+Math.random()*.8
+    }));
+    rings=Array.from({length:3},(_,i)=>({r:0,max:200,sp:.8+i*.3,al:.3-i*.08}));
+  }
+  resize();
+  function draw(){
+    ctx.clearRect(0,0,W,H);t+=.01;
+    const cx=W*.68,cy=H*.5;
+    // grid lines subtle
+    ctx.save();ctx.globalAlpha=.04;
+    for(let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.strokeStyle='#00C9A7';ctx.lineWidth=.5;ctx.stroke()}
+    for(let y=0;y<H;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.strokeStyle='#00C9A7';ctx.lineWidth=.5;ctx.stroke()}
+    ctx.restore();
+
+    // LATAM abstract shape (simplified polygon)
+    const shape=[
+      [cx-120,cy-160],[cx-80,cy-180],[cx-20,cy-150],[cx+10,cy-90],
+      [cx-10,cy-30],[cx-50,cy+20],[cx-80,cy+80],[cx-110,cy+130],
+      [cx-140,cy+100],[cx-160,cy+40],[cx-150,cy-60],[cx-140,cy-120]
+    ];
+    ctx.beginPath();
+    ctx.moveTo(...shape[0]);
+    shape.forEach(([x,y])=>ctx.lineTo(x,y));
+    ctx.closePath();
+    ctx.fillStyle='rgba(245,166,35,.04)';ctx.fill();
+    ctx.strokeStyle='rgba(245,166,35,.15)';ctx.lineWidth=1;ctx.stroke();
+
+    // Colombia dot pulse
+    const colDot=[cx-60,cy+30];
+    const cPulse=.5+.5*Math.sin(t*2);
+    for(let i=3;i>0;i--){
+      ctx.beginPath();ctx.arc(...colDot,i*10*cPulse,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,201,167,${.08-i*.02})`;ctx.fill();
+    }
+    ctx.beginPath();ctx.arc(...colDot,4,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,201,167,.9)';ctx.fill();
+
+    // Convergence beams from right
+    beams.forEach(b=>{
+      if(b.len<b.max)b.len+=b.sp;
+      const bx=cx+Math.cos(b.angle+t*.04)*b.len;
+      const by=cy+Math.sin(b.angle+t*.04)*b.len*.55;
+      const gr=ctx.createLinearGradient(cx,cy,bx,by);
+      gr.addColorStop(0,`rgba(${b.col},.35)`);gr.addColorStop(1,`rgba(${b.col},0)`);
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(bx,by);
+      ctx.strokeStyle=gr;ctx.lineWidth=b.w;ctx.stroke();
+    });
+
+    // Center glow
+    const rg=ctx.createRadialGradient(cx,cy,0,cx,cy,50);
+    rg.addColorStop(0,'rgba(0,201,167,.25)');rg.addColorStop(1,'transparent');
+    ctx.fillStyle=rg;ctx.beginPath();ctx.arc(cx,cy,50,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(0,201,167,.8)';ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fill();
+
+    raf=requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  Reveal.on('slidechanged',e=>{
+    if(e.indexh===3){if(!raf){t=0;beams.forEach(b=>b.len=0);draw()}}
+    else{cancelAnimationFrame(raf);raf=null}
+  });
+})();
+
+/* ══ BG5: ANCHOR SPIRAL + DNA ══ */
+(function(){
+  const cv=document.getElementById('c5'),ctx=cv.getContext('2d');
+  let W,H,raf,t=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+  resize();
+  function draw(){
+    ctx.clearRect(0,0,W,H);t+=.007;
+    const cx=W*.75,cy=H*.5;
+
+    // DNA double helix on right
+    for(let i=0;i<60;i++){
+      const y=H*.1+i*(H*.8/60);
+      const x1=cx+Math.sin(i*.25+t)*35;
+      const x2=cx-Math.sin(i*.25+t)*35;
+      // strands
+      if(i>0){
+        const py=H*.1+(i-1)*(H*.8/60);
+        const px1=cx+Math.sin((i-1)*.25+t)*35;
+        const px2=cx-Math.sin((i-1)*.25+t)*35;
+        ctx.beginPath();ctx.moveTo(px1,py);ctx.lineTo(x1,y);
+        ctx.strokeStyle=`rgba(0,201,167,.25)`;ctx.lineWidth=1.2;ctx.stroke();
+        ctx.beginPath();ctx.moveTo(px2,py);ctx.lineTo(x2,y);
+        ctx.strokeStyle=`rgba(0,201,167,.25)`;ctx.lineWidth=1.2;ctx.stroke();
+      }
+      // rungs
+      if(i%4===0){
+        const al=.08+.08*Math.sin(i*.3+t*2);
+        ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);
+        ctx.strokeStyle=`rgba(0,201,167,${al})`;ctx.lineWidth=1;ctx.stroke();
+        // dots
+        ctx.beginPath();ctx.arc(x1,y,2,0,Math.PI*2);
+        ctx.fillStyle=`rgba(0,201,167,.6)`;ctx.fill();
+        ctx.beginPath();ctx.arc(x2,y,2,0,Math.PI*2);ctx.fill();
+      }
+    }
+
+    // Triple spiral anchor
+    const scx=W*.3,scy=H*.5;
+    for(let arm=0;arm<3;arm++){
+      ctx.save();ctx.translate(scx,scy);ctx.rotate(t+arm*(Math.PI*2/3));
+      ctx.beginPath();
+      for(let i=0;i<180;i++){
+        const a=(i/180)*Math.PI*5;const r=i*1.4;
+        const x=Math.cos(a)*r,y=Math.sin(a)*r;
+        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      }
+      const gr=ctx.createLinearGradient(0,0,180,0);
+      gr.addColorStop(0,`rgba(0,201,167,.5)`);gr.addColorStop(1,`rgba(0,201,167,0)`);
+      ctx.strokeStyle=gr;ctx.lineWidth=1;ctx.stroke();
+      ctx.restore();
+    }
+
+    // Anchor ghost
+    ctx.save();ctx.translate(scx,scy);
+    ctx.font=`${H*.55}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(0,201,167,.04)';ctx.fillText('⚓',0,0);
+    ctx.restore();
+
+    // Rotating outer ring
+    ctx.save();ctx.translate(scx,scy);ctx.rotate(t*.3);
+    for(let i=0;i<12;i++){
+      ctx.rotate(Math.PI*2/12);
+      const pulse=.5+.5*Math.sin(t*3+i*.5);
+      ctx.beginPath();ctx.arc(160,0,3,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,201,167,${.3+.3*pulse})`;ctx.fill();
+      ctx.beginPath();ctx.moveTo(140,0);ctx.lineTo(155,0);
+      ctx.strokeStyle=`rgba(0,201,167,.15)`;ctx.lineWidth=1;ctx.stroke();
+    }
+    ctx.restore();
+
+    raf=requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  Reveal.on('slidechanged',e=>{
+    if(e.indexh===4){if(!raf){t=0;draw()}}else{cancelAnimationFrame(raf);raf=null}
+  });
+})();
+
+/* ══ BG6: MORPHING GRID + PARTICLES ══ */
+(function(){
+  const cv=document.getElementById('c6'),ctx=cv.getContext('2d');
+  let W,H,raf,cells=[],floaters=[],t=0;
+  function resize(){
+    W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;
+    cells=[];
+    const sz=55,cols=Math.ceil(W/sz)+1,rows=Math.ceil(H/sz)+1;
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)
+      cells.push({x:c*sz,y:r*sz,sz,ph:Math.random()*Math.PI*2,sp:.008+Math.random()*.01});
+    floaters=Array.from({length:20},()=>({
+      x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*3,
+      vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,ph:Math.random()*Math.PI*2
+    }));
+  }
+  resize();
+  function draw(){
+    ctx.clearRect(0,0,W,H);t+=.012;
+    // animated grid
+    cells.forEach(c=>{
+      c.ph+=c.sp;
+      const al=.02+.025*Math.sin(c.ph+t);
+      ctx.strokeStyle=`rgba(0,201,167,${al*2.5})`;
+      ctx.lineWidth=.5;ctx.strokeRect(c.x,c.y,c.sz-2,c.sz-2);
+      // fill flicker
+      ctx.fillStyle=`rgba(0,201,167,${al*.3})`;
+      ctx.fillRect(c.x+1,c.y+1,c.sz-4,c.sz-4);
+    });
+    // floaters
+    floaters.forEach(f=>{
+      f.ph+=.02;f.x+=f.vx+Math.sin(f.ph)*.2;f.y+=f.vy+Math.cos(f.ph)*.1;
+      if(f.x<0)f.x=W;if(f.x>W)f.x=0;if(f.y<0)f.y=H;if(f.y>H)f.y=0;
+      const pulse=.5+.5*Math.sin(f.ph*2+t);
+      const rg=ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,f.r*4);
+      rg.addColorStop(0,`rgba(0,201,167,${.3*pulse})`);rg.addColorStop(1,'transparent');
+      ctx.fillStyle=rg;ctx.beginPath();ctx.arc(f.x,f.y,f.r*4,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=`rgba(0,201,167,${.7*pulse})`;
+      ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,Math.PI*2);ctx.fill();
+    });
+    // corner accent
+    ctx.save();
+    const gr=ctx.createRadialGradient(W,0,0,W,0,300);
+    gr.addColorStop(0,'rgba(0,201,167,.06)');gr.addColorStop(1,'transparent');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    ctx.restore();
+    raf=requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  Reveal.on('slidechanged',e=>{
+    if(e.indexh===5){if(!raf){t=0;draw()}}else{cancelAnimationFrame(raf);raf=null}
+  });
+})();
+
+</script>
+</body>
+</html>
